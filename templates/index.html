@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>SmartCrop AI</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+
+</head>
+
+
+<body>
+
+
+<!-- ================================================= -->
+<!-- NAVBAR -->
+<!-- ================================================= -->
+
+<nav class="navbar">
+
+    <div class="logo">
+        🌾 SmartCrop AI
+    </div>
+
+    <div class="nav-text">
+        Intelligent Crop Yield Prediction
+    </div>
+
+</nav>
+
+
+
+<!-- ================================================= -->
+<!-- HERO -->
+<!-- ================================================= -->
+
+<section class="hero">
+
+    <div>
+
+        <span class="badge">
+            AI POWERED AGRICULTURE
+        </span>
+
+        <h1>
+            Smart Crop Yield
+            <span>Prediction</span>
+        </h1>
+
+        <p>
+
+            Predict crop yield using Machine Learning
+            and discover suitable crops for your
+            agricultural conditions.
+
+        </p>
+
+    </div>
+
+</section>
+
+
+
+<!-- ================================================= -->
+<!-- MAIN CONTAINER -->
+<!-- ================================================= -->
+
+<div class="container">
+
+
+    <!-- ================================================= -->
+    <!-- INPUT CARD -->
+    <!-- ================================================= -->
+
+    <div class="card">
+
+        <div class="card-title">
+
+            <div class="icon">
+                🌱
+            </div>
+
+            <div>
+
+                <h2>
+                    Enter Agricultural Conditions
+                </h2>
+
+                <p>
+                    Provide the required information
+                    to generate a prediction.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <form
+            action="/predict"
+            method="POST"
+        >
+
+
+            <div class="form-grid">
+
+
+                <!-- YEAR -->
+
+                <div class="input-group">
+
+                    <label>
+                        Year
+                    </label>
+
+                    <input
+                        type="number"
+                        name="Year"
+                        value="{{ selected_year or 2026 }}"
+                        required
+                    >
+
+                </div>
+
+
+
+                <!-- RAINFALL -->
+
+                <div class="input-group">
+
+                    <label>
+                        Average Rainfall
+                        <small>(mm/year)</small>
+                    </label>
+
+                    <input
+                        type="number"
+                        step="0.01"
+                        name="average_rain_fall_mm_per_year"
+                        value="{{ selected_rainfall or 1000 }}"
+                        required
+                    >
+
+                </div>
+
+
+
+                <!-- PESTICIDE -->
+
+                <div class="input-group">
+
+                    <label>
+                        Pesticides
+                        <small>(tonnes)</small>
+                    </label>
+
+                    <input
+                        type="number"
+                        step="0.01"
+                        name="pesticides_tonnes"
+                        value="{{ selected_pesticides or 100 }}"
+                        required
+                    >
+
+                </div>
+
+
+
+                <!-- TEMPERATURE -->
+
+                <div class="input-group">
+
+                    <label>
+                        Average Temperature
+                        <small>(°C)</small>
+                    </label>
+
+                    <input
+                        type="number"
+                        step="0.01"
+                        name="avg_temp"
+                        value="{{ selected_temperature or 25 }}"
+                        required
+                    >
+
+                </div>
+
+
+
+                <!-- AREA -->
+
+                <div class="input-group">
+
+                    <label>
+                        Country / Area
+                    </label>
+
+                    <select
+                        name="Area"
+                        required
+                    >
+
+                        <option value="">
+                            Select Area
+                        </option>
+
+                        {% for area in areas %}
+
+                        <option
+                            value="{{ area }}"
+                            {% if selected_area == area %}
+                            selected
+                            {% endif %}
+                        >
+
+                            {{ area }}
+
+                        </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+
+
+                <!-- CROP -->
+
+                <div class="input-group">
+
+                    <label>
+                        Crop
+                    </label>
+
+                    <select
+                        name="Item"
+                        required
+                    >
+
+                        <option value="">
+                            Select Crop
+                        </option>
+
+                        {% for crop in crops %}
+
+                        <option
+                            value="{{ crop }}"
+                            {% if selected_crop == crop %}
+                            selected
+                            {% endif %}
+                        >
+
+                            {{ crop }}
+
+                        </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+
+            </div>
+
+
+            <button
+                class="predict-btn"
+                type="submit"
+            >
+
+                🔮 Predict Crop Yield
+
+            </button>
+
+
+        </form>
+
+    </div>
+
+
+
+    {% if error %}
+
+    <div class="error-box">
+
+        ⚠️ {{ error }}
+
+    </div>
+
+    {% endif %}
+
+
+
+    {% if prediction is defined %}
+
+
+    <!-- ================================================= -->
+    <!-- RESULT -->
+    <!-- ================================================= -->
+
+    <div class="result-card">
+
+        <div>
+
+            <p class="result-label">
+                PREDICTED CROP YIELD
+            </p>
+
+            <div class="prediction-number">
+
+                {{ prediction }}
+
+                <span>
+                    hg/ha
+                </span>
+
+            </div>
+
+            <p>
+                {{ selected_crop }}
+                •
+                {{ selected_area }}
+                •
+                {{ selected_year }}
+            </p>
+
+        </div>
+
+
+        <div class="yield-status {{ yield_class }}">
+
+            <span>
+                ●
+            </span>
+
+            {{ yield_level }} Yield
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ================================================= -->
+    <!-- 5 UNIQUE FEATURES -->
+    <!-- ================================================= -->
+
+
+    <div class="section-heading">
+
+        <h2>
+            🌾 Smart Agriculture Insights
+        </h2>
+
+        <p>
+            AI-generated analysis based on your input.
+        </p>
+
+    </div>
+
+
+
+    <!-- ================================================= -->
+    <!-- CROP RECOMMENDATION -->
+    <!-- ================================================= -->
+
+    <div class="card">
+
+        <h2>
+            🏆 Top 3 Recommended Crops
+        </h2>
+
+        <p class="muted">
+
+            Crops are ranked according to their
+            predicted yield under the same conditions.
+
+        </p>
+
+
+        <div class="recommendations">
+
+            {% for item in top_crops %}
+
+            <div class="crop-card">
+
+                <div class="rank">
+                    #{{ loop.index }}
+                </div>
+
+                <div class="crop-name">
+
+                    {{ item.crop }}
+
+                </div>
+
+                <div class="crop-yield">
+
+                    {{ item.yield }}
+                    <small>hg/ha</small>
+
+                </div>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ================================================= -->
+    <!-- BENCHMARK -->
+    <!-- ================================================= -->
+
+    <div class="two-column">
+
+
+        <div class="card">
+
+            <h2>
+                📊 Crop Benchmark
+            </h2>
+
+            <p class="muted">
+
+                Average historical yield for
+                {{ selected_crop }}
+
+            </p>
+
+            <div class="big-number">
+
+                {{ crop_average }}
+
+                <small>
+                    hg/ha
+                </small>
+
+            </div>
+
+
+            {% if benchmark_difference >= 0 %}
+
+            <div class="positive">
+
+                ▲ {{ benchmark_difference }}%
+                compared with historical average
+
+            </div>
+
+            {% else %}
+
+            <div class="negative">
+
+                ▼ {{ benchmark_difference|abs }}%
+                compared with historical average
+
+            </div>
+
+            {% endif %}
+
+        </div>
+
+
+
+        <!-- ================================================= -->
+        <!-- MODEL -->
+        <!-- ================================================= -->
+
+        <div class="card">
+
+            <h2>
+                🤖 Model Performance
+            </h2>
+
+            <div class="metric">
+
+                <span>
+                    R² Score
+                </span>
+
+                <strong>
+                    {{ model_r2 }}
+                </strong>
+
+            </div>
+
+            <div class="metric">
+
+                <span>
+                    MAE
+                </span>
+
+                <strong>
+                    {{ model_mae }}
+                </strong>
+
+            </div>
+
+            <p class="muted">
+
+                Model: Random Forest +
+                Random Search Optimization
+
+            </p>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ================================================= -->
+    <!-- FEATURE IMPORTANCE -->
+    <!-- ================================================= -->
+
+    <div class="card">
+
+        <h2>
+            🔍 What Influences Yield?
+        </h2>
+
+        <p class="muted">
+
+            Aggregated feature importance from
+            the optimized Random Forest model.
+
+        </p>
+
+
+        {% for feature, value in feature_importance %}
+
+        <div class="importance-row">
+
+            <div class="importance-header">
+
+                <span>
+                    {{ feature }}
+                </span>
+
+                <strong>
+                    {{ value }}%
+                </strong>
+
+            </div>
+
+            <div class="progress">
+
+                <div
+                    class="progress-bar"
+                    style="width: {{ value }}%"
+                ></div>
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+
+        <div class="insight">
+
+            💡 {{ insight }}
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ================================================= -->
+    <!-- WHAT IF ANALYSIS -->
+    <!-- ================================================= -->
+
+    <div class="card">
+
+        <h2>
+            🧪 What-If Scenario Analysis
+        </h2>
+
+        <p class="muted">
+
+            See how the predicted yield changes
+            when environmental conditions change.
+
+        </p>
+
+
+        <div class="scenario-grid">
+
+
+            <div class="scenario">
+
+                <span>
+                    Current Conditions
+                </span>
+
+                <strong>
+                    {{ scenarios.base }}
+                </strong>
+
+                <small>
+                    hg/ha
+                </small>
+
+            </div>
+
+
+            <div class="scenario">
+
+                <span>
+                    Rainfall +10%
+                </span>
+
+                <strong>
+                    {{ scenarios.rainfall_plus_10 }}
+                </strong>
+
+                <small>
+                    hg/ha
+                </small>
+
+            </div>
+
+
+            <div class="scenario">
+
+                <span>
+                    Rainfall -10%
+                </span>
+
+                <strong>
+                    {{ scenarios.rainfall_minus_10 }}
+                </strong>
+
+                <small>
+                    hg/ha
+                </small>
+
+            </div>
+
+
+            <div class="scenario">
+
+                <span>
+                    Temperature +2°C
+                </span>
+
+                <strong>
+                    {{ scenarios.temperature_plus_2 }}
+                </strong>
+
+                <small>
+                    hg/ha
+                </small>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+    {% endif %}
+
+
+</div>
+
+
+
+<footer>
+
+    <p>
+        🌾 SmartCrop AI
+        <br>
+        Machine Learning Based Crop Yield
+        Prediction & Recommendation System
+    </p>
+
+</footer>
+
+
+</body>
+
+</html>
